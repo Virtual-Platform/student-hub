@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { Container, Form, Button, Row, Col } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import app from '../firebase-config';
 
 function SignUp() {
   const navigate = useNavigate();
@@ -17,12 +19,27 @@ function SignUp() {
     username: '',
     password: ''
   });
+  const [error, setError] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically handle form submission to a backend
-    console.log('Form submitted:', formData);
-    navigate('/login');
+    const {username, password } = formData;
+    //validate username and password
+    if(!username || !password){
+      setError("Username and Password required!");
+      return;
+    }
+    const auth = getAuth(app);
+    try {
+      //user with Firebase Authentication
+      await createUserWithEmailAndPassword(auth, username, password);
+      console.log('You have signed up successfully:', formData);
+      navigate('/login');
+
+    } catch (error) {
+      //Handle the error
+      setError(error.message)
+    }
   };
 
   const handleChange = (e) => {
